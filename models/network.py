@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from configs import config
 from packages import Voxelization
-from target import Target
+from .target import Target
 
 class PillarLayer(nn.Module):
     def __init__(self, voxel_size, point_cloud_range, max_points, max_voxels):
