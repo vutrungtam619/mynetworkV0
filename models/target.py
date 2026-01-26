@@ -84,7 +84,7 @@ class Target:
                 cv2.fillPoly(mask, [np.stack([px, py], 1).astype(np.int32)], 1)
                 mask = torch.from_numpy(mask).to(device, dtype=torch.bool)
 
-                dx, dy = gx - center[0], gy - center[1]
+                dx, dy = center[0] - gx, center[1] - gy
                 dist = dx**2 + dy**2
                 d_old = dist_map[b, y0:y1, x0:x1]
                 upd = mask & (dist < d_old)

@@ -34,8 +34,8 @@ class Loss(nn.Module):
             beta=1.0
         )
 
-    def forward(self, pred_heatmap, pred_offset, gt_heatmap, gt_offset):
+    def forward(self, pred_heatmap, pred_offsetmap, gt_heatmap, gt_offset):
         heat_loss = self.focal_loss(pred_heatmap, gt_heatmap)
-        offset_loss = self.reg_loss(pred_offset, gt_offset, gt_heatmap)
+        offset_loss = self.reg_loss(pred_offsetmap, gt_offset, gt_heatmap)
         total_loss = self.cls_w * heat_loss + self.reg_w * offset_loss
         return {'focal_loss': heat_loss, 'reg_loss': offset_loss, 'total_loss': total_loss}

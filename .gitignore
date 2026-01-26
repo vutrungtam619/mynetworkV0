@@ -9,3 +9,5 @@ logs/
 datasets/*.pkl
 datasets/point_cloud_reduced/
 results/
+te.py
+te1.py
