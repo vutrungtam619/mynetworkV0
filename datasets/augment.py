@@ -87,7 +87,7 @@ def points_frustum_filter(data_dict):
         points=points, 
         r0_rect=calib['r0_rect'], 
         tr_velo_to_cam=calib['tr_velo_to_cam'], 
-        P2=calib['P2'], 
+        P2=calib['P0'], 
         image_shape=data_dict['image_info']['image_shape']
     )
     data_dict.update({
@@ -103,7 +103,7 @@ def bboxes_frustum_filter(data_dict):
         bboxes=bboxes,
         r0_rect=calib['r0_rect'], 
         tr_velo_to_cam=calib['tr_velo_to_cam'], 
-        P2=calib['P2'], 
+        P2=calib['P0'], 
         image_shape=data_dict['image_info']['image_shape']        
     )
     data_dict.update({
