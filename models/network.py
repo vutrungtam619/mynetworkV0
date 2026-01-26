@@ -122,53 +122,64 @@ class ResidualBlock(nn.Module):
                 nn.Conv2d(in_channels, out_channels, 1, stride=stride, bias=False),
                 nn.BatchNorm2d(out_channels)
             )
+    
     def forward(self, x):
-            identity = self.shortcut(x)
+        identity = self.shortcut(x)
 
-            out = self.conv1(x)
-            out = self.bn1(out)
-            out = self.relu1(out) 
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu1(out) 
 
-            out = self.conv2(out)
-            out = self.bn2(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
 
-            out += identity       
-            out = self.relu2(out) 
-            return out
-        
+        out += identity       
+        out = self.relu2(out) 
+        return out
+
 class Backbone(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(Backbone, self).__init__()
+        
         self.enc0 = nn.Sequential(
             ResidualBlock(in_channels, in_channels),
-            ResidualBlock(in_channels, in_channels), # (B, C, H, W)
+            ResidualBlock(in_channels, in_channels),
+            ResidualBlock(in_channels, in_channels),
         )
         
         self.enc1 = nn.Sequential(
             ResidualBlock(in_channels, in_channels*2, stride=2),
-            ResidualBlock(in_channels*2, in_channels*2) # (B, 2C, H/2, W/2)
+            ResidualBlock(in_channels*2, in_channels*2),
+            ResidualBlock(in_channels*2, in_channels*2),
         )
         
         self.enc2 = nn.Sequential(
             ResidualBlock(in_channels*2, in_channels*4, stride=2),
-            ResidualBlock(in_channels*4, in_channels*4) # (B, 4C, H/4, W/4)
+            ResidualBlock(in_channels*4, in_channels*4),
+            ResidualBlock(in_channels*4, in_channels*4),
         )
         
-        self.up1 = nn.ConvTranspose2d(in_channels*4, in_channels*2, kernel_size=2, stride=2) # (H/4, W/4) -> (H/2, W/2)
+        self.up1 = nn.ConvTranspose2d(in_channels*4, in_channels*2, kernel_size=2, stride=2)
+        self.dec1 = nn.Sequential(
+            ResidualBlock(in_channels*4, in_channels*2),
+            ResidualBlock(in_channels*2, in_channels*2),
+        )
         
-        self.dec1 = ResidualBlock(in_channels*4, in_channels*2)
-        
-        self.up2 = nn.ConvTranspose2d(in_channels*2, in_channels, kernel_size=2, stride=2) # (H/2, W/2) -> (H, W)
-        
-        self.dec2 = ResidualBlock(in_channels*2, in_channels)
+        self.up2 = nn.ConvTranspose2d(in_channels*2, in_channels, kernel_size=2, stride=2)
+        self.dec2 = nn.Sequential(
+            ResidualBlock(in_channels*2, in_channels),
+            ResidualBlock(in_channels, in_channels),
+        )
 
         self.out = nn.Conv2d(in_channels, out_channels, kernel_size=1)
         
     def forward(self, x):
+        # Encoder path
         x0 = self.enc0(x)   # (B, C, H, W)
         x1 = self.enc1(x0)  # (B, 2C, H/2, W/2)
         x2 = self.enc2(x1)  # (B, 4C, H/4, W/4)
         
+        # Decoder path with skip connections
         u1 = self.up1(x2)                 # (B, 2C, H/2, W/2)
         c1 = torch.cat([u1, x1], dim=1)   # (B, 4C, H/2, W/2)
         d1 = self.dec1(c1)                # (B, 2C, H/2, W/2)
@@ -177,7 +188,7 @@ class Backbone(nn.Module):
         c2 = torch.cat([u2, x0], dim=1)   # (B, 2C, H, W)
         d2 = self.dec2(c2)                # (B, C, H, W)
         
-        out = self.out(d2)  # (B, out, H, W)
+        out = self.out(d2)                # (B, out_channels, H, W)
         
         return out
         
