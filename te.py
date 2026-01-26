@@ -69,7 +69,7 @@ gt_heatmap = target_generator.get_heatmap(batch_gt_bboxes, batch_size, device)
 print(f"Shape của heatmap: {gt_heatmap.shape}")
 
 # Tạo offsetmap
-gt_offsetmap = target_generator.get_offsetmap(batch_gt_bboxes, batch_size, device)
+gt_offsetmap, gt_offsetmask = target_generator.get_offsetmap(batch_gt_bboxes, batch_size, device)
 print(f"Shape của offsetmap: {gt_offsetmap.shape}")
 
 # ===== VISUALIZATION =====

@@ -264,7 +264,7 @@ class MyNet(nn.Module):
                 batch_size=batch_size,
                 device=device
             )
-            gt_offsetmap = target_generator.get_offsetmap(
+            gt_offsetmap, gt_offsetmask = target_generator.get_offsetmap(
                 batch_gt_bboxes=batched_gt_bboxes,
                 batch_size=batch_size,
                 device=device                
