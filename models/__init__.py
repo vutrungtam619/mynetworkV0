@@ -1,2 +1,2 @@
-from .pointpillars import PointPillars
-from .anchor import Anchors, anchor_target, anchors2bboxes
+from .network import MyNet
+from .target import Target

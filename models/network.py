@@ -208,7 +208,7 @@ class Head(nn.Module):
         
         return heat_map, offset_map      
 
-class PointPillars(nn.Module):
+class MyNet(nn.Module):
     def __init__(
         self,
         nclasses=config['num_classes'], 
@@ -217,7 +217,7 @@ class PointPillars(nn.Module):
         max_points=config['max_points'],
         max_voxels=config['max_voxels'],
     ):
-        super(PointPillars, self).__init__()
+        super(MyNet, self).__init__()
         
         self.nclasses = nclasses
         

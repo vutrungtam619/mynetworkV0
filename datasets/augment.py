@@ -64,8 +64,6 @@ def points_range_filter(data_dict, point_cloud_range):
 
 def bboxes_range_filter(data_dict, point_cloud_range):
     gt_bboxes_3d = data_dict['gt_bboxes_3d']
-    gt_labels = data_dict['gt_labels']
-    gt_names = data_dict['gt_names']
 
     keep_mask = np.all([
         gt_bboxes_3d[:,0] >= point_cloud_range[0], gt_bboxes_3d[:,0] <= point_cloud_range[3],
@@ -73,15 +71,11 @@ def bboxes_range_filter(data_dict, point_cloud_range):
     ], axis=0)
 
     gt_bboxes_3d = gt_bboxes_3d[keep_mask]
-    gt_labels = gt_labels[keep_mask]
-    gt_names = gt_names[keep_mask]
 
     gt_bboxes_3d[:,6] = limit_period(gt_bboxes_3d[:,6], 0.5, 2*np.pi)
 
     data_dict.update({
         'gt_bboxes_3d': gt_bboxes_3d,
-        'gt_labels': gt_labels,
-        'gt_names': gt_names,
     })
     
     return data_dict  
