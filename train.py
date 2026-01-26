@@ -103,12 +103,14 @@ def main(args):
             pred_offsetmap = output['pred_offsetmap']
             gt_heatmap = output['gt_heatmap']
             gt_offsetmap = output['gt_offsetmap']
+            gt_offsetmask = output['gt_offsetmask']
             
             loss_dict = loss_func(
                 pred_heatmap=pred_heatmap,
                 pred_offsetmap=pred_offsetmap,
                 gt_heatmap=gt_heatmap,
-                gt_offsetmap=gt_offsetmap
+                gt_offsetmap=gt_offsetmap,
+                gt_offsetmask=gt_offsetmask,
             )        
             
             loss = loss_dict['total_loss']
@@ -167,13 +169,15 @@ def main(args):
                 pred_offsetmap = output['pred_offsetmap']
                 gt_heatmap = output['gt_heatmap']
                 gt_offsetmap = output['gt_offsetmap']
+                gt_offsetmask = output['gt_offsetmask']
                 
                 loss_dict = loss_func(
                     pred_heatmap=pred_heatmap,
                     pred_offsetmap=pred_offsetmap,
                     gt_heatmap=gt_heatmap,
-                    gt_offsetmap=gt_offsetmap
-                )       
+                    gt_offsetmap=gt_offsetmap,
+                    gt_offsetmask=gt_offsetmask,
+                )        
                         
                 for k, v in loss_dict.items():
                     val_loss_accum[k] = val_loss_accum.get(k, 0.0) + v.item()

@@ -273,7 +273,8 @@ class MyNet(nn.Module):
                 'pred_heatmap': heatmap,
                 'pred_offsetmap': offsetmap,
                 'gt_heatmap': gt_heatmap,
-                'gt_offsetmap': gt_offsetmap,               
+                'gt_offsetmap': gt_offsetmap,   
+                'gt_offsetmask': gt_offsetmask,            
             }
         
         if mode == 'test':
