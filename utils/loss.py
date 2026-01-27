@@ -3,29 +3,31 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Loss(nn.Module):
-    def __init__(self, alpha=2.0, gamma=4.0, cls_w=1.0, reg_w=2.0):
+    def __init__(self, alpha=2.0, gamma=2.0, cls_w=1.0, reg_w=2.0):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma
         self.cls_w = cls_w
         self.reg_w = reg_w
 
-    def focal_loss(self, pred_heatmap, gt_heatmap):
-        pred = torch.sigmoid(pred_heatmap).clamp(1e-6, 1 - 1e-6)
-        pos_mask = gt_heatmap.gt(0).float()
-        neg_mask = gt_heatmap.eq(0).float()
+    def focal_loss(pred_heatmap, gt_heatmap, alpha=2.0, gamma=2.0):
+        pred = torch.sigmoid(pred_heatmap).clamp(1e-6, 1.0 - 1e-6)
+        pos_mask = (gt_heatmap == 1).float()
+        neg_mask = (gt_heatmap < 1).float()
 
-        pos_loss = -((1 - pred) ** self.alpha) * torch.log(pred) * pos_mask * gt_heatmap
-        neg_loss = -((1 - gt_heatmap) ** self.gamma) * (pred ** self.alpha) * torch.log(1 - pred) * neg_mask
+        pos_loss = -torch.log(pred) * ((1.0 - pred) ** alpha) * pos_mask
+        neg_weight = (1.0 - gt_heatmap) ** gamma
+        neg_loss = -torch.log(1.0 - pred) * (pred ** alpha) * neg_weight * neg_mask
+        num_pos = pos_mask.sum()
+        if num_pos < 1:
+            return neg_loss.sum()
 
-        num_pos = (gt_heatmap == 1).sum().clamp(min=1.0)
-        return (pos_loss + neg_loss).sum() / num_pos
+        return (pos_loss.sum() + neg_loss.sum()) / num_pos
 
     def reg_loss(self, pred_offset, gt_offsetmap, offset_mask):
         if offset_mask.sum() == 0:
             return pred_offset.sum() * 0.0
-
-        mask = offset_mask.expand_as(pred_offset)  # (B,2,H,W)
+        mask = offset_mask.expand_as(pred_offset)  # (B, 2, H, W)
 
         return F.smooth_l1_loss(
             pred_offset[mask],
