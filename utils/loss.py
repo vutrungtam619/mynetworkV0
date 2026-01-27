@@ -10,14 +10,14 @@ class Loss(nn.Module):
         self.cls_w = cls_w
         self.reg_w = reg_w
 
-    def focal_loss(pred_heatmap, gt_heatmap, alpha=2.0, gamma=2.0):
+    def focal_loss(self, pred_heatmap, gt_heatmap):
         pred = torch.sigmoid(pred_heatmap).clamp(1e-6, 1.0 - 1e-6)
         pos_mask = (gt_heatmap == 1).float()
         neg_mask = (gt_heatmap < 1).float()
 
-        pos_loss = -torch.log(pred) * ((1.0 - pred) ** alpha) * pos_mask
-        neg_weight = (1.0 - gt_heatmap) ** gamma
-        neg_loss = -torch.log(1.0 - pred) * (pred ** alpha) * neg_weight * neg_mask
+        pos_loss = -torch.log(pred) * ((1.0 - pred) ** self.alpha) * pos_mask
+        neg_weight = (1.0 - gt_heatmap) ** self.gamma
+        neg_loss = -torch.log(1.0 - pred) * (pred ** self.alpha) * neg_weight * neg_mask
         num_pos = pos_mask.sum()
         if num_pos < 1:
             return neg_loss.sum()
