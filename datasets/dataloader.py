@@ -33,7 +33,7 @@ def collate_fn(list_data):
     rt_data_dict = dict(
         batched_pts=batched_pts_list, 
         batched_gt_bboxes=batched_gt_bboxes_list,
-        batched_numpoints=batched_numpoints_list,
+        batched_gt_numpoints=batched_numpoints_list,
         batched_labels=batched_labels_list,
         batched_names=batched_names_list,
         batched_image_info=batched_image_info_list,
