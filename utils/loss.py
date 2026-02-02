@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Loss(nn.Module):
-    def __init__(self, alpha=2.0, gamma=2.0, cls_w=1.0, reg_w=2.0):
+    def __init__(self, alpha=1.0, gamma=1.0, cls_w=1.0, reg_w=10.0):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma

@@ -144,18 +144,15 @@ class Backbone(nn.Module):
         self.enc0 = nn.Sequential(
             ResidualBlock(in_channels, in_channels),
             ResidualBlock(in_channels, in_channels),
-            ResidualBlock(in_channels, in_channels),
         )
         
         self.enc1 = nn.Sequential(
             ResidualBlock(in_channels, in_channels*2, stride=2),
             ResidualBlock(in_channels*2, in_channels*2),
-            ResidualBlock(in_channels*2, in_channels*2),
         )
         
         self.enc2 = nn.Sequential(
             ResidualBlock(in_channels*2, in_channels*4, stride=2),
-            ResidualBlock(in_channels*4, in_channels*4),
             ResidualBlock(in_channels*4, in_channels*4),
         )
         

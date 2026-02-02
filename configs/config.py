@@ -16,6 +16,6 @@ config = {
     'batch_size_val': 4,
     'num_workers': 4,
     'init_lr': 0.00025,
-    'epoch': 120,
+    'epoch': 100,
     'ckpt_freq': 2,
 }
