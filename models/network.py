@@ -252,7 +252,7 @@ class MyNet(nn.Module):
             n_classes=nclasses
         )
         
-    def forward(self, mode, batched_pts, batched_gt_bboxes):
+    def forward(self, mode, batched_pts, batched_gt_bboxes, batched_gt_numpoints):
         batch_size = len(batched_pts)
         
         pillars, coors_batch, npoints_per_pillar = self.pillar_layer(batched_pts)
@@ -270,6 +270,7 @@ class MyNet(nn.Module):
             gt_heatmap = target_generator.get_heatmap(
                 batch_gt_bboxes=batched_gt_bboxes,
                 batch_size=batch_size,
+                batched_gt_numpoints = batched_gt_numpoints,
                 device=device
             )
             gt_offsetmap, gt_offsetmask = target_generator.get_offsetmap(

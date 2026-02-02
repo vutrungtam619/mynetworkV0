@@ -25,31 +25,37 @@ class Target:
             self._gaussian_cache[key] = torch.exp(-(x**2 + y**2) / (2 * sigma**2))
         return self._gaussian_cache[key]
 
-    def get_heatmap(self, batch_gt_bboxes, batch_size, device, sigma_factor=3):
+    def get_heatmap(self, batch_gt_bboxes, batch_size, batched_gt_numpoints, device, sigma0=1.5, alpha=1.0):
         r = max(1, int(min(0.6 / self.vx, 0.6 / self.vy) / 2))
-        gaussian = self._get_gaussian_kernel(r, r / sigma_factor, device)
         heatmap = torch.zeros((batch_size, 1, self.y_grid, self.x_grid), device=device)
 
         for b in range(batch_size):
             gt = batch_gt_bboxes[b]
-            if len(gt) == 0: continue
-
-            centers = gt[:, :2]
+            num_points = batched_gt_numpoints[b]
+            if len(gt) == 0:
+                continue
+            centers = gt[:, :2]  # (N, 2)
             cx = ((centers[:, 0] - self.x_offset) / self.vx).long()
             cy = ((centers[:, 1] - self.y_offset) / self.vy).long()
             valid = (cx >= 0) & (cx < self.x_grid) & (cy >= 0) & (cy < self.y_grid)
             cx, cy = cx[valid], cy[valid]
+            num_points = num_points[valid]
 
-            for x, y in zip(cx.tolist(), cy.tolist()):
+            for i in range(len(cx)):
+                x, y = cx[i].item(), cy[i].item()
+                A_b = 0.36
+                rho_b = num_points[i].float() / A_b
+                rho_hat = torch.log1p(rho_b)
+                sigma_b = sigma0 / (1.0 + alpha * rho_hat)
+
+                gaussian = self._get_gaussian_kernel(r, sigma_b.item(), device)
+
                 lx, rx = max(0, x - r), min(self.x_grid, x + r + 1)
                 ty, by = max(0, y - r), min(self.y_grid, y + r + 1)
                 gl, gr = r - (x - lx), r + (rx - x)
                 gt_, gb = r - (y - ty), r + (by - y)
 
-                heatmap[b, 0, ty:by, lx:rx] = torch.max(
-                    heatmap[b, 0, ty:by, lx:rx],
-                    gaussian[gt_:gb, gl:gr],
-                )
+                heatmap[b, 0, ty:by, lx:rx] = torch.max(heatmap[b, 0, ty:by, lx:rx], gaussian[gt_:gb, gl:gr])
 
         return heatmap  # (B, 1, H, W)
 
