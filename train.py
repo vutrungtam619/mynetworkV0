@@ -161,6 +161,7 @@ def main(args):
                             
                 batched_pts = data_dict['batched_pts']
                 batched_gt_bboxes = data_dict['batched_gt_bboxes']
+                batched_gt_numpoints = data_dict['batched_gt_numpoints']
 
                 output = model(
                     mode='train',
