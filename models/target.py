@@ -40,6 +40,7 @@ class Target:
             num_points = batched_gt_numpoints[b]
             if not torch.is_tensor(num_points): num_points = torch.from_numpy(num_points)
             num_points = num_points.to(device)[valid]
+            
             for i in range(cx.shape[0]):
                 x = int(cx[i]); y = int(cy[i])
                 rho_hat = torch.log1p(num_points[i] / 0.36)
@@ -51,7 +52,7 @@ class Target:
                 gt_ = r - (y - ty); gb = r + (by - y)
                 heatmap[b, 0, ty:by, lx:rx] = torch.maximum(heatmap[b, 0, ty:by, lx:rx], gaussian[gt_:gb, gl:gr])
                 
-        return heatmap #(B, C, H, W)
+        return heatmap #(B, 1, H, W)
 
     def get_offsetmap(self, batch_gt_bboxes, batch_size, device):
         offset = torch.zeros((batch_size, 2, self.y_grid, self.x_grid), device=device)
