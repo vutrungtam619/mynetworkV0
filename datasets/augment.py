@@ -64,21 +64,24 @@ def points_range_filter(data_dict, point_cloud_range):
 
 def bboxes_range_filter(data_dict, point_cloud_range):
     gt_bboxes_3d = data_dict['gt_bboxes_3d']
+    gt_numpoints = data_dict.get('gt_numpoints', None)
 
     keep_mask = np.all([
-        gt_bboxes_3d[:,0] >= point_cloud_range[0], gt_bboxes_3d[:,0] <= point_cloud_range[3],
-        gt_bboxes_3d[:,1] >= point_cloud_range[1], gt_bboxes_3d[:,1] <= point_cloud_range[4]
+        gt_bboxes_3d[:, 0] >= point_cloud_range[0],
+        gt_bboxes_3d[:, 0] <= point_cloud_range[3],
+        gt_bboxes_3d[:, 1] >= point_cloud_range[1],
+        gt_bboxes_3d[:, 1] <= point_cloud_range[4],
     ], axis=0)
 
     gt_bboxes_3d = gt_bboxes_3d[keep_mask]
+    gt_bboxes_3d[:, 6] = limit_period(gt_bboxes_3d[:, 6], 0.5, 2 * np.pi)
 
-    gt_bboxes_3d[:,6] = limit_period(gt_bboxes_3d[:,6], 0.5, 2*np.pi)
+    data_dict['gt_bboxes_3d'] = gt_bboxes_3d
 
-    data_dict.update({
-        'gt_bboxes_3d': gt_bboxes_3d,
-    })
-    
-    return data_dict  
+    if gt_numpoints is not None:
+        data_dict['gt_numpoints'] = gt_numpoints[keep_mask]
+
+    return data_dict
 
 def points_frustum_filter(data_dict):
     calib = data_dict['calib_info']
@@ -98,19 +101,21 @@ def points_frustum_filter(data_dict):
 
 def bboxes_frustum_filter(data_dict):
     bboxes = data_dict['gt_bboxes_3d']
+    gt_numpoints = data_dict.get('gt_numpoints', None)
     calib = data_dict['calib_info']
-    bboxes = remove_outside_bboxes(
+    bboxes, keep_mask = remove_outside_bboxes(
         bboxes=bboxes,
-        r0_rect=calib['r0_rect'], 
-        tr_velo_to_cam=calib['tr_velo_to_cam'], 
-        P2=calib['P0'], 
-        image_shape=data_dict['image_info']['image_shape']        
+        r0_rect=calib['r0_rect'],
+        tr_velo_to_cam=calib['tr_velo_to_cam'],
+        P2=calib['P0'],
+        image_shape=data_dict['image_info']['image_shape'],
+        return_mask=True
     )
-    data_dict.update({
-        'gt_bboxes_3d': bboxes,
-    })
-    
-    return data_dict  
+    data_dict['gt_bboxes_3d'] = bboxes
+    if gt_numpoints is not None:
+        data_dict['gt_numpoints'] = gt_numpoints[keep_mask]
+
+    return data_dict
 
 def points_shuffle(data_dict):
     pts = data_dict['pts']

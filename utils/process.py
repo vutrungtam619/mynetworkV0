@@ -726,9 +726,8 @@ def remove_outside_points(points, r0_rect, tr_velo_to_cam, P2, image_shape):
     points = points[indices.reshape([-1])]
     return points
 
-def remove_outside_bboxes(bboxes, r0_rect, tr_velo_to_cam, P2, image_shape):
+def remove_outside_bboxes(bboxes, r0_rect, tr_velo_to_cam, P2, image_shape, return_mask=False):
     corners_lidar_all = bbox3d2corners(bboxes)  # (m, 8, 3)
-
     C, R, T = projection_matrix_to_CRT_kitti(P2)
     img_bbox = [0, 0, image_shape[1], image_shape[0]]
     frustum_cam = get_frustum(img_bbox, C)  # (8, 3)
@@ -736,15 +735,16 @@ def remove_outside_bboxes(bboxes, r0_rect, tr_velo_to_cam, P2, image_shape):
     frustum_cam = (np.linalg.inv(R) @ frustum_cam.T).T
     frustum_lidar = points_camera2lidar(frustum_cam[None, ...], tr_velo_to_cam, r0_rect)
     frustum_surfaces = group_plane_equation(group_rectangle_vertexs(frustum_lidar))
-
     keep = []
     for i in range(len(corners_lidar_all)):
         mask = points_in_bboxes(corners_lidar_all[i], frustum_surfaces)[..., 0]  # (8,)
         out_count = np.sum(~mask)
         keep.append(out_count <= 4)
-
     keep = np.array(keep, dtype=bool)
-    return bboxes[keep]
+    if return_mask:
+        return bboxes[keep], keep
+    else:
+        return bboxes[keep]
 
 def remove_out_range_points(pts, point_range):
     keep_mask = np.all([
