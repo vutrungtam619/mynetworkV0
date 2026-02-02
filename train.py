@@ -99,7 +99,7 @@ def main(args):
                 mode='train',
                 batched_pts=batched_pts,
                 batched_gt_bboxes=batched_gt_bboxes,
-                batched_gt_numpoints = data_dict['batched_gt_numpoints']
+                batched_gt_numpoints = batched_gt_numpoints,
             )
             pred_heatmap = output['pred_heatmap']
             pred_offsetmap = output['pred_offsetmap']
@@ -166,6 +166,7 @@ def main(args):
                     mode='train',
                     batched_pts=batched_pts,
                     batched_gt_bboxes=batched_gt_bboxes,
+                    batched_gt_numpoints = batched_gt_numpoints,
                 )
                 pred_heatmap = output['pred_heatmap']
                 pred_offsetmap = output['pred_offsetmap']
